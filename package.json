@@ -2,7 +2,7 @@
   "name": "nightcrawler",
   "version": "0.0.1",
   "description": "scraping streams for puppeteer",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
     "test": "ava",
     "watch:test": "ava -w -v"
