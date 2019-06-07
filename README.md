@@ -14,19 +14,21 @@
 
 ```
 const Nightcrawler = require('nightcrawler')
+const JSONStream = require('JSONStream')
 
-const main = async () => {
-  let nc = new Nightcrawler()
-  let q = nc
-    .get('http://example.com')
-    .waitFor('body')
-    .groupBy('body > div')
-    .select({ title: 'p' })
+let nc = new Nightcrawler()
+let qStream = nc.createStream()
 
-  let result = await nc.run(q)
-  console.log(result)
-  process.exit(0)
-}
+// Pipe to standard out
+qStream.pipe(JSONStream.stringify(false)).pipe(process.stdout)
 
-main()
+let q = nc
+  .get('http://example.com')
+  .waitFor('body')
+  .groupBy('body > div')
+  .select({ title: 'p' })
+
+qStream.write(q)
+
+qStream.end()
 ```
