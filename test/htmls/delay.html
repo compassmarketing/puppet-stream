@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Mac OS X version 5.2.0">
+  <title>Test Delay AJAX Page</title>
+</head>
+<body>
+  <div id="demo">
+    <h1>The XMLHttpRequest Object</h1>
+  </div>
+  <script>
+function loadDoc() {
+  setTimeout(function() {
+    document.getElementById('demo').innerHTML = '<ul><li>DYNAMIC THING</li></ul>'
+  }, 500)
+}
+
+if (window.attachEvent) {
+  window.attachEvent('onload', loadDoc)
+} else {
+  if (window.onload) {
+    var curronload = window.onload
+    var newonload = function(evt) {
+      curronload(evt)
+      loadDoc(evt)
+    }
+    window.onload = newonload
+  } else {
+    window.onload = loadDoc
+  }
+}
+</script>
+</body>
+</html>

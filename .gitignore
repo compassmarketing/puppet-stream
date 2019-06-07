@@ -1,0 +1,18 @@
+test.csv
+node_modules/
+env.list
+.DS_Store
+package-lock.json
+
+
+# Terraform
+secret.tfvars
+.terraform
+terraform.tfstate.d/
+
+# dev/testing utils
+live-test.sh
+sampler.sh
+
+gcloud-service-key.json
+scripts/run.sh
