@@ -1,4 +1,4 @@
-const Nightcrawler = require('../lib')
+const Nightcrawler = require('@coreycollins/nightcrawler')
 
 const JSONStream = require('JSONStream')
 

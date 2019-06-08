@@ -7,13 +7,20 @@
 ### Install
 
 ```
-  npm i nightcrawler
+  npm i @coreycollins/nightcrawler
+```
+
+**Important**: Nightcrawler has a dependency to `puppeteer-core`. This allows for a custom executable to be used if desired. If
+you would like to use the chrome executable bundled with puppeteer, please install it like so:
+
+```
+npm i puppeteer
 ```
 
 ### Usage
 
 ```
-const Nightcrawler = require('nightcrawler')
+const Nightcrawler = require('@coreycollin/nightcrawler')
 const JSONStream = require('JSONStream')
 
 let nc = new Nightcrawler()
