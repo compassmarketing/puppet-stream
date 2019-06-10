@@ -1,5 +1,7 @@
 # Nightcrawler
 
+[![CircleCI](https://circleci.com/gh/coreycollins/nightcrawler/tree/master.svg?style=svg)](https://circleci.com/gh/coreycollins/nightcrawler/tree/master)
+
 > Nightcrawler is a node library that makes it easy to stream scraping requests to Puppeteer using native NodeJS streams.
 
 ## Getting Started
