@@ -20,7 +20,7 @@ npm i puppeteer
 ### Usage
 
 ```
-const Nightcrawler = require('@coreycollin/nightcrawler')
+const Nightcrawler = require('@coreycollins/nightcrawler')
 const JSONStream = require('JSONStream')
 
 let nc = new Nightcrawler()
