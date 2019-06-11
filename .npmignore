@@ -4,3 +4,4 @@ test
 examples
 .DS_Store
 package-lock.json
+Dockerfile.puppeteerci
