@@ -65,7 +65,7 @@ test('should close correctly', async t => {
   })
 })
 
-test('should pass nothing on network errors', async t => {
+test('should pass nothing on network errors with no send option', async t => {
   let stream = new QueryStream(t.context.browser)
   let q = Query.get('bad')
 
@@ -79,5 +79,18 @@ test('should pass nothing on network errors', async t => {
     })
 
     stream.write(q)
+  })
+})
+
+test('should pass errors with send option', async t => {
+  let stream = new QueryStream(t.context.browser, { sendErrors: true })
+  let q = Query.get('https://httpstat.us/404')
+
+  await stream._transform(q, null, err => {
+    t.not(!err)
+    let buffer = stream._readableState.buffer
+    t.is(buffer.length, 1)
+
+    t.deepEqual(buffer.head, { data: { error: 'Not Found', code: 404 }, next: null })
   })
 })

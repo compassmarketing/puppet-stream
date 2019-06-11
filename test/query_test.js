@@ -32,19 +32,20 @@ test.afterEach.always(async t => {
   await t.context.page.close()
 })
 
-test.serial('should throw error if undefined or null url is used', t => {
-  t.throws(
-    () => {
-      new Query()
+test.serial('should throw error if undefined or null url is used', async t => {
+  await t.throwsAsync(
+    async () => {
+      await Query.get()
     },
     { message: 'invalid query' }
   )
 })
 
-test.serial('should throw error if invalid method', t => {
-  t.throws(
-    () => {
-      new Query({ url: 'http://test.com', method: 'PUT' })
+test.serial('should throw error if invalid method', async t => {
+  await t.throwsAsync(
+    async () => {
+      let q = new Query()
+      await q.go('http://test.com', { method: 'PUT' })
     },
     { message: 'invalid method PUT' }
   )
@@ -91,7 +92,7 @@ test.serial('should throw error if bad request', async t => {
     async () => {
       await Query.get('http://bad.com')._run(t.context.page)
     },
-    { message: 'response return status code: 404' }
+    { message: 'Not Found', code: 404 }
   )
 })
 
@@ -228,4 +229,16 @@ test.serial('should get text from attr', async t => {
     ._run(t.context.page)
 
   t.deepEqual(results, [{ dataAttr: 'datainhere' }])
+})
+
+test.serial('should passthrough data', async t => {
+  let url = `${t.context.server.host}/example.html`
+  let q = new Query({ url, passthrough: { foo: 'bar' } })
+
+  let results = await q
+    .go(url)
+    .select({ title: 'body > div > p' })
+    ._run(t.context.page)
+
+  t.deepEqual(results, [{ title: 'Test', passthrough: { foo: 'bar' } }])
 })
