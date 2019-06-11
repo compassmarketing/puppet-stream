@@ -3,7 +3,7 @@ const chromium = require('chrome-aws-lambda')
 const Nightcrawler = require('@coreycollins/nightcrawler')
 
 exports.handler = async (event, context) => {
-  const executablePath = await chromium.executablePath()
+  const executablePath = await chromium.executablePath
 
   let nc = new Nightcrawler({ executablePath })
   let q = nc
