@@ -1,6 +1,6 @@
 {
   "name": "@coreycollins/nightcrawler",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "scraping streams for puppeteer",
   "main": "index.js",
   "engines": {
