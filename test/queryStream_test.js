@@ -47,22 +47,22 @@ test('should close correctly', async t => {
   let url = `file://${path.join(__dirname, 'htmls/example.html')}`
   let q = Query.get(url).select({ title: 'body > div > p' })
 
-  await new Promise((resolve, reject) => {
+  let defer = new Promise((resolve, reject) => {
     stream.on('error', err => {
       console.log(err)
       reject(err)
     })
 
-    stream.on('data', d => {
-      stream.push(null)
-    })
-
-    stream.on('end', a => {
+    stream.on('finish', a => {
       t.pass()
       resolve()
     })
-    stream.write(q)
   })
+
+  stream.write(q)
+  stream.end()
+
+  await defer
 })
 
 test('should pass nothing on network errors with no send option', async t => {
