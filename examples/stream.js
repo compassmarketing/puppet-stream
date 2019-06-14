@@ -19,9 +19,9 @@ readable.pipe(qStream).toArray((err, arr) => {
 
 let q = nc
   .get('http://example.com')
-  .waitFor('body')
-  .groupBy('body > div')
-  .select({ title: 'p' })
+  .waitFor(nc.$('body'))
+  .groupBy(nc.$('body > div'))
+  .select({ title: nc.$('p') })
 
 readable.push(q)
 readable.push(null)

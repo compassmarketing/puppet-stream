@@ -2,7 +2,7 @@ const test = require('ava')
 const path = require('path')
 
 const TestServer = require('../utils/testServer')
-const Query = require('../lib/query')
+const { Query, $ } = require('../lib/query')
 const Browser = require('../lib/browser')
 
 const { TimeoutError } = require('puppeteer/Errors')
@@ -54,7 +54,7 @@ test.serial('should throw error if invalid method', async t => {
 test.serial('should return an array of results', async t => {
   let url = `${t.context.server.host}/example.html`
   let results = await Query.get(url)
-    .select({ title: 'body > div > p' })
+    .select({ title: $('body > div > p') })
     ._run(t.context.page)
 
   t.true(results instanceof Array)
@@ -102,7 +102,7 @@ test.serial('should send a post request', async t => {
   const [serverRequest] = await Promise.all([
     t.context.server.waitForRequest('/example.html'),
     Query.post(url, { postData: 'doggo' })
-      .select({ title: 'body > div > p' })
+      .select({ title: $('body > div > p') })
       ._run(t.context.page)
   ])
 
@@ -114,8 +114,8 @@ test.serial('should wait for a selector', async t => {
   let url = `${t.context.server.host}/delay.html`
 
   let results = await Query.get(url)
-    .waitFor('#demo > ul > li')
-    .select({ title: '#demo > ul > li' })
+    .waitFor($('#demo > ul > li'))
+    .select({ title: $('#demo > ul > li') })
     ._run(t.context.page)
 
   t.deepEqual(results, [{ title: 'DYNAMIC THING' }])
@@ -125,8 +125,8 @@ test.serial('should groupBy elements', async t => {
   let url = `${t.context.server.host}/example.html`
 
   let results = await Query.get(url)
-    .groupBy('body > div')
-    .select({ title: 'p' })
+    .groupBy($('body > div'))
+    .select({ title: $('p') })
     ._run(t.context.page)
 
   t.deepEqual(results, [{ title: 'Test' }, { title: 'Foo' }])
@@ -136,9 +136,9 @@ test.serial('should chain functions together', async t => {
   let url = `${t.context.server.host}/example.html`
 
   let results = await Query.get(url)
-    .waitFor('body')
-    .groupBy('body > div')
-    .select({ title: 'p' })
+    .waitFor($('body'))
+    .groupBy($('body > div'))
+    .select({ title: $('p') })
     ._run(t.context.page)
 
   t.deepEqual(results, [{ title: 'Test' }, { title: 'Foo' }])
@@ -149,7 +149,7 @@ test.serial('should timeout after 10ms while waiting for an element', async t =>
 
   await t.throwsAsync(async () => {
     await Query.get(url)
-      .waitFor('body > doesnotexists', 10)
+      .waitFor($('body > doesnotexists'), 10)
       ._run(t.context.page)
   }, TimeoutError)
 })
@@ -159,8 +159,8 @@ test.serial('should expect only one select function', async t => {
 
   await t.throwsAsync(async () => {
     await Query.get(url)
-      .select({ title: 'body > div > p' })
-      .select({ title: 'body > div > p' })
+      .select({ title: $('body > div > p') })
+      .select({ title: $('body > div > p') })
       ._run(t.context.page)
   }, 'Select can only take a path collection')
 })
@@ -170,7 +170,7 @@ test.serial('should goto multiple pages', async t => {
 
   let results = await Query.get(url)
     .go(`${t.context.server.host}/example.html`)
-    .select({ title: 'body > div > p' })
+    .select({ title: $('body > div > p') })
     ._run(t.context.page)
 
   t.deepEqual(results, [{ title: 'Test' }])
@@ -191,7 +191,7 @@ test.serial('should preform a custom action', async t => {
 
   let results = await Query.get(url)
     .eval(addEle)
-    .select({ title: 'body > div > span' })
+    .select({ title: $('body > div > span') })
     ._run(t.context.page)
 
   t.deepEqual(results, [{ title: 'Foo' }])
@@ -202,12 +202,14 @@ test.serial('should get single result from a complex webpage', async t => {
 
   let results = await Query.get(url)
     .select({
-      name: 'div.section-hero-header-title > h1',
-      address:
-        '#pane > div.widget-pane.widget-pane-content-disabled.widget-pane-offscreen > div.widget-pane-content.scrollable-y > div > div > div:nth-child(5) > div > span:nth-child(3) > span.section-info-text > span:nth-child(1) > span',
-      phone:
-        '#pane > div.widget-pane.widget-pane-content-disabled.widget-pane-offscreen > div.widget-pane-content.scrollable-y > div > div > div:nth-child(7) > div > span:nth-child(3) > span.section-info-text > button',
-      url: 'a[data-attribution-url]'
+      name: $('div.section-hero-header-title > h1'),
+      address: $(
+        '#pane > div.widget-pane.widget-pane-content-disabled.widget-pane-offscreen > div.widget-pane-content.scrollable-y > div > div > div:nth-child(5) > div > span:nth-child(3) > span.section-info-text > span:nth-child(1) > span'
+      ),
+      phone: $(
+        '#pane > div.widget-pane.widget-pane-content-disabled.widget-pane-offscreen > div.widget-pane-content.scrollable-y > div > div > div:nth-child(7) > div > span:nth-child(3) > span.section-info-text > button'
+      ),
+      url: $('a[data-attribution-url]')
     })
     ._run(t.context.page)
 
@@ -225,20 +227,18 @@ test.serial('should get text from attr', async t => {
   let url = `${t.context.server.host}/example.html`
 
   let results = await Query.get(url)
-    .select({ dataAttr: { path: 'body > div > p', attr: 'data-attr' } })
+    .select({ dataAttr: $('body > div > p', 'data-attr') })
     ._run(t.context.page)
 
   t.deepEqual(results, [{ dataAttr: 'datainhere' }])
 })
 
-test.serial('should passthrough data', async t => {
+test.serial('should passthrough values that are not selectors', async t => {
   let url = `${t.context.server.host}/example.html`
-  let q = new Query({ url, passthrough: { foo: 'bar' } })
 
-  let results = await q
-    .go(url)
-    .select({ title: 'body > div > p' })
+  let results = await Query.get(url)
+    .select({ title: $('body > div > p'), foo: 'bar' })
     ._run(t.context.page)
 
-  t.deepEqual(results, [{ title: 'Test', passthrough: { foo: 'bar' } }])
+  t.deepEqual(results, [{ title: 'Test', foo: 'bar' }])
 })

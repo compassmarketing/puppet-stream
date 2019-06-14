@@ -1,8 +1,9 @@
 const test = require('ava')
 const path = require('path')
+const Stream = require('stream')
 
 const QueryStream = require('../lib/queryStream')
-const Query = require('../lib/query')
+const { Query, $ } = require('../lib/query')
 const Browser = require('../lib/browser')
 
 test.before(async t => {
@@ -31,7 +32,7 @@ test('should only allow Query objects through the stream', async t => {
 test('should transform a query into results', async t => {
   let stream = new QueryStream(t.context.browser)
   let url = `file://${path.join(__dirname, 'htmls/example.html')}`
-  let q = Query.get(url).select({ title: 'body > div > p' })
+  let q = Query.get(url).select({ title: $('body > div > p') })
 
   await stream._transform(q, null, err => {
     t.falsy(err)
@@ -82,33 +83,16 @@ test('should pass nothing on network errors with no send option', async t => {
   })
 })
 
-test.only('should pass errors with send option', async t => {
+test('should pass errors with send option', async t => {
+  const readable = new Stream.Readable({ objectMode: true })
+
   let stream = new QueryStream(t.context.browser, { sendErrors: true })
   let q = Query.get('https://httpstat.us/404')
 
-  let defer = new Promise((resolve, reject) => {
-    // should not raise an error
-    stream.on('error', err => {
-      t.fail()
-      reject(err)
-    })
+  readable.push(q)
+  readable.push(null)
 
-    stream.on('finish', a => {
-      t.pass()
-      resolve()
-    })
-  })
+  let results = await readable.pipe(stream).toArray()
 
-  stream.write(q)
-  stream.end()
-
-  await defer
-
-  // await stream._transform(q, null, err => {
-  //   t.not(!err)
-  //   let buffer = stream._readableState.buffer
-  //   t.is(buffer.length, 1)
-  //
-  //   t.deepEqual(buffer.head, { data: { error: 'Not Found', code: 404 }, next: null })
-  // })
+  t.deepEqual(results, [{ error: 'Not Found', code: 404 }])
 })
