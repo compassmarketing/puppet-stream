@@ -1,12 +1,21 @@
 const Nightcrawler = require('@coreycollins/nightcrawler')
+const Stream = require('stream')
 
-const JSONStream = require('JSONStream')
+const readable = new Stream.Readable({ objectMode: true })
 
 let nc = new Nightcrawler()
-let qStream = nc.createStream()
+let qStream = nc.createStream({ sendErrors: false })
 
 // Pipe to standard out
-qStream.pipe(JSONStream.stringify(false)).pipe(process.stdout)
+readable.pipe(qStream).toArray((err, arr) => {
+  if (err) {
+    console.log(err)
+    process.exit(1)
+  }
+
+  console.log(arr)
+  process.exit(0)
+})
 
 let q = nc
   .get('http://example.com')
@@ -14,6 +23,5 @@ let q = nc
   .groupBy('body > div')
   .select({ title: 'p' })
 
-qStream.write(q)
-
-qStream.end()
+readable.push(q)
+readable.push(null)

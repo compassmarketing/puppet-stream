@@ -14,7 +14,8 @@
   "license": "ISC",
   "dependencies": {
     "async": "^3.0.1",
-    "puppeteer-core": "^1.17.0"
+    "puppeteer-core": "^1.17.0",
+    "stream-to-array": "^2.3.0"
   },
   "devDependencies": {
     "puppeteer": "^1.17.0",
