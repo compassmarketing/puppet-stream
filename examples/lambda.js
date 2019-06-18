@@ -7,7 +7,7 @@ exports.handler = async (event, context) => {
 
   let nc = new Nightcrawler({ executablePath })
   let q = nc
-    .get('http://example.com')
+    .go('http://example.com')
     .waitFor(nc.$('body'))
     .groupBy(nc.$('body > div'))
     .select({ title: nc.$('p') })

@@ -3,7 +3,7 @@ const Nightcrawler = require('@coreycollins/nightcrawler')
 const main = async () => {
   let nc = new Nightcrawler()
   let q = nc
-    .get('http://example.com')
+    .go('http://example.com')
     .waitFor(nc.$('body'))
     .groupBy(nc.$('body > div'))
     .select({ title: nc.$('p') })
