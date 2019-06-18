@@ -32,7 +32,7 @@ test('should only allow Query objects through the stream', async t => {
 test('should transform a query into results', async t => {
   let stream = new QueryStream(t.context.browser)
   let url = `file://${path.join(__dirname, 'htmls/example.html')}`
-  let q = Query.get(url).select({ title: $('body > div > p') })
+  let q = Query.go(url).select({ title: $('body > div > p') })
 
   await stream._transform(q, null, err => {
     t.falsy(err)
@@ -46,7 +46,7 @@ test('should transform a query into results', async t => {
 test('should close correctly', async t => {
   let stream = new QueryStream(t.context.browser)
   let url = `file://${path.join(__dirname, 'htmls/example.html')}`
-  let q = Query.get(url).select({ title: 'body > div > p' })
+  let q = Query.go(url).select({ title: 'body > div > p' })
 
   let defer = new Promise((resolve, reject) => {
     stream.on('error', err => {
@@ -68,7 +68,7 @@ test('should close correctly', async t => {
 
 test('should pass nothing on network errors with no send option', async t => {
   let stream = new QueryStream(t.context.browser)
-  let q = Query.get('bad')
+  let q = Query.go('bad')
 
   await new Promise((resolve, reject) => {
     stream.on('error', err => {
@@ -87,7 +87,7 @@ test('should pass errors with send option', async t => {
   const readable = new Stream.Readable({ objectMode: true })
 
   let stream = new QueryStream(t.context.browser, { sendErrors: true })
-  let q = Query.get('https://httpstat.us/404')
+  let q = Query.go('https://httpstat.us/404')
 
   readable.push(q)
   readable.push(null)

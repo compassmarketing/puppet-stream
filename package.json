@@ -18,9 +18,10 @@
     "stream-to-array": "^2.3.0"
   },
   "devDependencies": {
-    "puppeteer": "^1.17.0",
     "JSONStream": "^1.3.5",
     "ava": "^2.0.0",
+    "http-proxy": "^1.17.0",
+    "puppeteer": "^1.17.0",
     "standard": "^10.0.3"
   },
   "repository": {

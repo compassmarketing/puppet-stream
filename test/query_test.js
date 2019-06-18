@@ -35,25 +35,15 @@ test.afterEach.always(async t => {
 test.serial('should throw error if undefined or null url is used', async t => {
   await t.throwsAsync(
     async () => {
-      await Query.get()
+      await Query.go()
     },
     { message: 'invalid query' }
   )
 })
 
-test.serial('should throw error if invalid method', async t => {
-  await t.throwsAsync(
-    async () => {
-      let q = new Query()
-      await q.go('http://test.com', { method: 'PUT' })
-    },
-    { message: 'invalid method PUT' }
-  )
-})
-
 test.serial('should return an array of results', async t => {
   let url = `${t.context.server.host}/example.html`
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .select({ title: $('body > div > p') })
     ._run(t.context.page)
 
@@ -64,7 +54,7 @@ test.serial('should throw error if extract function doesnt return result', async
   let url = `${t.context.server.host}/example.html`
   await t.throwsAsync(
     async () => {
-      await Query.get(url)._run(t.context.page)
+      await Query.go(url)._run(t.context.page)
     },
     { message: 'query did not return any results. Did you forget a select?' }
   )
@@ -73,7 +63,7 @@ test.serial('should throw error if extract function doesnt return result', async
 test.serial('should throw error if blank request', async t => {
   await t.throwsAsync(
     async () => {
-      await Query.get('about:blank')._run(t.context.page)
+      await Query.go('about:blank')._run(t.context.page)
     },
     { message: 'blank page' }
   )
@@ -90,30 +80,16 @@ test.serial('should throw error if bad request', async t => {
   })
   await t.throwsAsync(
     async () => {
-      await Query.get('http://bad.com')._run(t.context.page)
+      await Query.go('http://bad.com')._run(t.context.page)
     },
     { message: 'Not Found', code: 404 }
   )
 })
 
-test.serial('should send a post request', async t => {
-  t.plan(2)
-  let url = `${t.context.server.host}/example.html`
-  const [serverRequest] = await Promise.all([
-    t.context.server.waitForRequest('/example.html'),
-    Query.post(url, { postData: 'doggo' })
-      .select({ title: $('body > div > p') })
-      ._run(t.context.page)
-  ])
-
-  t.is(serverRequest.method, 'POST')
-  t.is(await serverRequest.postBody, 'doggo')
-})
-
 test.serial('should wait for a selector', async t => {
   let url = `${t.context.server.host}/delay.html`
 
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .waitFor($('#demo > ul > li'))
     .select({ title: $('#demo > ul > li') })
     ._run(t.context.page)
@@ -124,7 +100,7 @@ test.serial('should wait for a selector', async t => {
 test.serial('should groupBy elements', async t => {
   let url = `${t.context.server.host}/example.html`
 
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .groupBy($('body > div'))
     .select({ title: $('p') })
     ._run(t.context.page)
@@ -135,7 +111,7 @@ test.serial('should groupBy elements', async t => {
 test.serial('should chain functions together', async t => {
   let url = `${t.context.server.host}/example.html`
 
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .waitFor($('body'))
     .groupBy($('body > div'))
     .select({ title: $('p') })
@@ -148,7 +124,7 @@ test.serial('should timeout after 10ms while waiting for an element', async t =>
   let url = `${t.context.server.host}/example.html`
 
   await t.throwsAsync(async () => {
-    await Query.get(url)
+    await Query.go(url)
       .waitFor($('body > doesnotexists'), 10)
       ._run(t.context.page)
   }, TimeoutError)
@@ -158,7 +134,7 @@ test.serial('should expect only one select function', async t => {
   let url = `${t.context.server.host}/example.html`
 
   await t.throwsAsync(async () => {
-    await Query.get(url)
+    await Query.go(url)
       .select({ title: $('body > div > p') })
       .select({ title: $('body > div > p') })
       ._run(t.context.page)
@@ -168,7 +144,7 @@ test.serial('should expect only one select function', async t => {
 test.serial('should goto multiple pages', async t => {
   let url = `${t.context.server.host}/delay.html`
 
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .go(`${t.context.server.host}/example.html`)
     .select({ title: $('body > div > p') })
     ._run(t.context.page)
@@ -189,7 +165,7 @@ test.serial('should preform a custom action', async t => {
     return { page, results }
   }
 
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .eval(addEle)
     .select({ title: $('body > div > span') })
     ._run(t.context.page)
@@ -200,7 +176,7 @@ test.serial('should preform a custom action', async t => {
 test.serial('should get single result from a complex webpage', async t => {
   let url = `${t.context.server.host}/gmap_us_single.html`
 
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .select({
       name: $('div.section-hero-header-title > h1'),
       address: $(
@@ -226,7 +202,7 @@ test.serial('should get single result from a complex webpage', async t => {
 test.serial('should get text from attr', async t => {
   let url = `${t.context.server.host}/example.html`
 
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .select({ dataAttr: $('body > div > p', 'data-attr') })
     ._run(t.context.page)
 
@@ -236,7 +212,7 @@ test.serial('should get text from attr', async t => {
 test.serial('should passthrough values that are not selectors', async t => {
   let url = `${t.context.server.host}/example.html`
 
-  let results = await Query.get(url)
+  let results = await Query.go(url)
     .select({ title: $('body > div > p'), foo: 'bar' })
     ._run(t.context.page)
 
