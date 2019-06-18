@@ -3,7 +3,6 @@ const path = require('path')
 
 const http = require('http')
 const httpProxy = require('http-proxy')
-const request = require('request')
 
 const TestServer = require('../utils/testServer')
 const Browser = require('../lib/browser')
