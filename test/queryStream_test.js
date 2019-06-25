@@ -42,7 +42,7 @@ test('should transform a query into results', async t => {
     t.deepEqual(buffer.head, {
       data: {
         _context: {
-          url: 'file:///Users/coreycollins/Development/nc/test/htmls/example.html'
+          url: url
         },
         results: [
           {
