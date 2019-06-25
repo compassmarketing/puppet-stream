@@ -57,7 +57,7 @@ test.serial('should send context with results', async t => {
   let resp = await q._run(t.context.page)
 
   t.truthy(resp.results)
-  t.deepEqual(resp._context, { foo: 'bar' })
+  t.deepEqual(resp._context, { url: 'http://localhost:9000/example.html', foo: 'bar' })
 })
 
 test.serial('should throw error if extract function doesnt return result', async t => {
@@ -67,6 +67,16 @@ test.serial('should throw error if extract function doesnt return result', async
       await Query.go(url)._run(t.context.page)
     },
     { message: 'query did not return any results. Did you forget a select?' }
+  )
+})
+
+test.serial('should throw error if context isnt an object', async t => {
+  await t.throws(
+    () => {
+      let q = new Query()
+      q.context = 'notanobject'
+    },
+    { message: 'context must be an object' }
   )
 })
 

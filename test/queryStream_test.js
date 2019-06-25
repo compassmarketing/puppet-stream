@@ -41,7 +41,9 @@ test('should transform a query into results', async t => {
 
     t.deepEqual(buffer.head, {
       data: {
-        _context: {},
+        _context: {
+          url: 'file:///Users/coreycollins/Development/nc/test/htmls/example.html'
+        },
         results: [
           {
             title: 'Test'
@@ -104,5 +106,11 @@ test('should pass errors with send option', async t => {
 
   let results = await readable.pipe(stream).toArray()
 
-  t.deepEqual(results, [{ error: 'Not Found', code: 404 }])
+  t.deepEqual(results, [
+    {
+      error: 'Not Found',
+      code: 404,
+      _context: { url: 'https://httpstat.us/404' }
+    }
+  ])
 })
