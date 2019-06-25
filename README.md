@@ -35,7 +35,7 @@ let q = nc
   .get('http://example.com')
   .waitFor('body')
   .groupBy('body > div')
-  .select({ title: 'p' })
+  .select({ title: nc.$('p') })
 
 qStream.write(q)
 
