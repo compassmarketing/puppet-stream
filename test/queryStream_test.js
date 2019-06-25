@@ -39,7 +39,17 @@ test('should transform a query into results', async t => {
     let buffer = stream._readableState.buffer
     t.is(buffer.length, 1)
 
-    t.deepEqual(buffer.head, { data: { title: 'Test' }, next: null })
+    t.deepEqual(buffer.head, {
+      data: {
+        _context: {},
+        results: [
+          {
+            title: 'Test'
+          }
+        ]
+      },
+      next: null
+    })
   })
 })
 

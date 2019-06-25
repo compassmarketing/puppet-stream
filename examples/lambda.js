@@ -12,7 +12,7 @@ exports.handler = async (event, context) => {
     .groupBy(nc.$('body > div'))
     .select({ title: nc.$('p') })
 
-  let result = await nc.run(q)
+  let resp = await nc.run(q)
 
-  return context.succeed(result)
+  return context.succeed(resp)
 }

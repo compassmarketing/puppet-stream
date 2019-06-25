@@ -8,8 +8,8 @@ const main = async () => {
     .groupBy(nc.$('body > div'))
     .select({ title: nc.$('p') })
 
-  let result = await nc.run(q)
-  console.log(result)
+  let resp = await nc.run(q)
+  console.log(resp)
   process.exit(0)
 }
 

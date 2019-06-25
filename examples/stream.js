@@ -7,13 +7,13 @@ let nc = new Nightcrawler()
 let qStream = nc.createStream({ sendErrors: false })
 
 // Pipe to standard out
-readable.pipe(qStream).toArray((err, arr) => {
+readable.pipe(qStream).toArray((err, resp) => {
   if (err) {
     console.log(err)
     process.exit(1)
   }
 
-  console.log(arr)
+  console.log(resp)
   process.exit(0)
 })
 
