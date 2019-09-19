@@ -78,34 +78,16 @@ test('should close correctly', async t => {
   await defer
 })
 
-test('should pass nothing on network errors with no send option', async t => {
-  let stream = new QueryStream(t.context.browser)
-  let q = Query.go('bad')
-
-  await new Promise((resolve, reject) => {
-    stream.on('error', err => {
-      t.not(!err)
-      t.is(stream._readableState.buffer.length, 0)
-      t.true(stream.writable)
-      t.true(stream.readable)
-      resolve()
-    })
-
-    stream.write(q)
-  })
-})
-
-test('should pass errors with send option', async t => {
+test('should pass errors', async t => {
   const readable = new Stream.Readable({ objectMode: true })
 
-  let stream = new QueryStream(t.context.browser, { sendErrors: true })
+  let stream = new QueryStream(t.context.browser)
   let q = Query.go('https://httpstat.us/404')
 
   readable.push(q)
   readable.push(null)
 
   let results = await readable.pipe(stream).toArray()
-
   t.deepEqual(results, [
     {
       error: 'Not Found',
@@ -113,4 +95,17 @@ test('should pass errors with send option', async t => {
       _context: { url: 'https://httpstat.us/404' }
     }
   ])
+})
+
+test('should retry', async t => {
+  const readable = new Stream.Readable({ objectMode: true })
+
+  let stream = new QueryStream(t.context.browser)
+  let q = Query.go('https://httpstat.us/503')
+
+  readable.push(q)
+  readable.push(null)
+
+  let results = await readable.pipe(stream).toArray()
+  t.deepEqual(results, [])
 })
