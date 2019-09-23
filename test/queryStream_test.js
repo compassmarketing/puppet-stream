@@ -100,7 +100,7 @@ test('should pass errors', async t => {
 test('should retry', async t => {
   const readable = new Stream.Readable({ objectMode: true })
 
-  let stream = new QueryStream(t.context.browser, { shouldRetry: () => true })
+  let stream = new QueryStream(t.context.browser, { shouldRetry: () => true, retryFor: 10 })
   let q = Query.go('https://httpstat.us/503')
 
   readable.push(q)
