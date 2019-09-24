@@ -26,7 +26,7 @@ test('should only allow Query objects through the stream', async t => {
   let stream = new QueryStream(t.context.browser)
   await t.throwsAsync(async () => {
     await stream._transform({ foo: 'bar' }, null, () => {})
-  }, 'Only Query can be sent through the stream.')
+  }, 'Only Query objects can be sent through the stream.')
 })
 
 test('should transform a query into results', async t => {
@@ -34,25 +34,25 @@ test('should transform a query into results', async t => {
   let url = `file://${path.join(__dirname, 'htmls/example.html')}`
   let q = Query.go(url).select({ title: $('body > div > p') })
 
-  await stream._transform(q, null, err => {
-    t.falsy(err)
-    let buffer = stream._readableState.buffer
-    t.is(buffer.length, 1)
+  const readable = new Stream.Readable({ objectMode: true })
 
-    t.deepEqual(buffer.head, {
-      data: {
-        _context: {
-          url: url
-        },
-        results: [
-          {
-            title: 'Test'
-          }
-        ]
+  readable.push(q)
+  readable.push(null)
+
+  const results = await readable.pipe(stream).toArray()
+
+  t.deepEqual(results, [
+    {
+      _context: {
+        url: url
       },
-      next: null
-    })
-  })
+      results: [
+        {
+          title: 'Test'
+        }
+      ]
+    }
+  ])
 })
 
 test('should close correctly', async t => {
@@ -99,8 +99,18 @@ test('should pass errors', async t => {
 
 test('should retry', async t => {
   const readable = new Stream.Readable({ objectMode: true })
+  t.plan(6)
 
-  let stream = new QueryStream(t.context.browser, { shouldRetry: () => true, retryFor: 10 })
+  const retry = err => {
+    if (err.code === 503) {
+      t.pass()
+      return true
+    } else {
+      false
+    }
+  }
+
+  let stream = new QueryStream(t.context.browser, { shouldRetry: retry, retryFor: 10 })
   let q = Query.go('https://httpstat.us/503')
 
   readable.push(q)
@@ -108,4 +118,34 @@ test('should retry', async t => {
 
   let results = await readable.pipe(stream).toArray()
   t.deepEqual(results, [])
+})
+
+test('should transform a query into results with dop 10', async t => {
+  let stream = new QueryStream(t.context.browser, { dop: 2 })
+  let url = `file://${path.join(__dirname, 'htmls/example.html')}`
+
+  let q1 = Query.go(url).select({ title: $('body > div > p') })
+  let q2 = Query.go(url).select({ title: $('body > div > p') })
+  let q3 = Query.go(url).select({ title: $('body > div > p') })
+  let q4 = Query.go(url).select({ title: $('body > div > p') })
+  let q5 = Query.go(url).select({ title: $('body > div > p:nth-child(1)') })
+  let q6 = Query.go(url).select({ title: $('body > div > p:nth-child(1)') })
+
+  const readable = new Stream.Readable({ objectMode: true })
+
+  readable.push(q1)
+  readable.push(q2)
+  readable.push(q3)
+  readable.push(q4)
+  readable.push(q5)
+  readable.push(q6)
+  readable.push(null)
+
+  const results = await readable.pipe(stream).toArray()
+  const titles = results
+    .map(r => {
+      return r.results[0].title
+    })
+    .sort(t => t)
+  t.deepEqual(titles, ['Test', 'Test', 'Test', 'Test', 'Foo', 'Foo'])
 })

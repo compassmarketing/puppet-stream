@@ -16,20 +16,10 @@ test.before(async t => {
   t.context.browser = new Browser()
 })
 
-test.beforeEach(async t => {
-  let window = await t.context.browser.get()
-  t.context.page = await window.newPage()
-  t.context.page.setDefaultNavigationTimeout(500)
-})
-
 test.after.always('guaranteed cleanup', async t => {
   // This will always run, regardless of earlier failures
   await t.context.browser.close()
   await t.context.server.stop()
-})
-
-test.afterEach.always(async t => {
-  await t.context.page.close()
 })
 
 test.serial('should throw error if undefined or null url is used', async t => {
@@ -42,29 +32,32 @@ test.serial('should throw error if undefined or null url is used', async t => {
 })
 
 test.serial('should return an object with results', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
   let resp = await Query.go(url)
     .select({ title: $('body > div > p') })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.truthy(resp.results)
 })
 
 test.serial('should send context with results', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
   let q = Query.go(url).select({ title: $('body > div > p') })
   q.context = { foo: 'bar' }
-  let resp = await q._run(t.context.page)
+  let resp = await q._run(browser)
 
   t.truthy(resp.results)
   t.deepEqual(resp._context, { url: 'http://localhost:9000/example.html', foo: 'bar' })
 })
 
 test.serial('should throw error if extract function doesnt return result', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
   await t.throwsAsync(
     async () => {
-      await Query.go(url)._run(t.context.page)
+      await Query.go(url)._run(browser)
     },
     { message: 'query did not return any results. Did you forget a select?' }
   )
@@ -81,98 +74,99 @@ test.serial('should throw error if context isnt an object', async t => {
 })
 
 test.serial('should throw error if blank request', async t => {
+  let browser = await t.context.browser.get()
   await t.throwsAsync(
     async () => {
-      await Query.go('about:blank')._run(t.context.page)
+      await Query.go('about:blank')._run(browser)
     },
     { message: 'blank page' }
   )
 })
 
 test.serial('should throw error if bad request', async t => {
-  await t.context.page.setRequestInterception(true)
-  t.context.page.on('request', req => {
-    return req.respond({
-      status: 404,
-      contentType: 'text/plain',
-      body: 'Not Found!'
-    })
-  })
+  let browser = await t.context.browser.get()
   await t.throwsAsync(
     async () => {
-      await Query.go('http://bad.com')._run(t.context.page)
+      await Query.go('https://httpstat.us/404')._run(browser)
     },
     { message: 'Not Found', code: 404 }
   )
 })
 
 test.serial('should wait for a selector', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/delay.html`
 
   let resp = await Query.go(url)
     .waitFor($('#demo > ul > li'))
     .select({ title: $('#demo > ul > li') })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.deepEqual(resp.results, [{ title: 'DYNAMIC THING' }])
 })
 
 test.serial('should groupBy elements', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
 
   let resp = await Query.go(url)
     .groupBy($('body > div'))
     .select({ title: $('p') })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.deepEqual(resp.results, [{ title: 'Test' }, { title: 'Foo' }])
 })
 
 test.serial('should chain functions together', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
 
   let resp = await Query.go(url)
     .waitFor($('body'))
     .groupBy($('body > div'))
     .select({ title: $('p') })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.deepEqual(resp.results, [{ title: 'Test' }, { title: 'Foo' }])
 })
 
 test.serial('should timeout after 10ms while waiting for an element', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
 
   await t.throwsAsync(async () => {
     await Query.go(url)
       .waitFor($('body > doesnotexists'), 10)
-      ._run(t.context.page)
+      ._run(browser)
   }, TimeoutError)
 })
 
 test.serial('should expect only one select function', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
 
   await t.throwsAsync(async () => {
     await Query.go(url)
       .select({ title: $('body > div > p') })
       .select({ title: $('body > div > p') })
-      ._run(t.context.page)
+      ._run(browser)
   }, 'Select can only take a path collection')
 })
 
 test.serial('should goto multiple pages', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/delay.html`
 
   let resp = await Query.go(url)
     .go(`${t.context.server.host}/example.html`)
     .select({ title: $('body > div > p') })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.deepEqual(resp.results, [{ title: 'Test' }])
 })
 
 test.serial('should preform a custom action', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
 
   let addEle = async ({ page, results } = {}) => {
@@ -188,12 +182,13 @@ test.serial('should preform a custom action', async t => {
   let resp = await Query.go(url)
     .eval(addEle)
     .select({ title: $('body > div > span') })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.deepEqual(resp.results, [{ title: 'Foo' }])
 })
 
 test.serial('should get single result from a complex webpage', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/gmap_us_single.html`
 
   let resp = await Query.go(url)
@@ -207,7 +202,7 @@ test.serial('should get single result from a complex webpage', async t => {
       ),
       url: $('a[data-attribution-url]')
     })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.deepEqual(resp.results, [
     {
@@ -220,21 +215,23 @@ test.serial('should get single result from a complex webpage', async t => {
 })
 
 test.serial('should get text from attr', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
 
   let resp = await Query.go(url)
     .select({ dataAttr: $('body > div > p', 'data-attr') })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.deepEqual(resp.results, [{ dataAttr: 'datainhere' }])
 })
 
 test.serial('should passthrough values that are not selectors', async t => {
+  let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
 
   let resp = await Query.go(url)
     .select({ title: $('body > div > p'), foo: 'bar' })
-    ._run(t.context.page)
+    ._run(browser)
 
   t.deepEqual(resp.results, [{ title: 'Test', foo: 'bar' }])
 })
