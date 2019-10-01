@@ -55,6 +55,7 @@ test.serial('should send context with results', async t => {
 test.serial('should throw error if extract function doesnt return result', async t => {
   let browser = await t.context.browser.get()
   let url = `${t.context.server.host}/example.html`
+
   await t.throwsAsync(
     async () => {
       await Query.go(url)._run(browser)
