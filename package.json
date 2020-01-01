@@ -1,5 +1,5 @@
 {
-  "name": "@coreycollins/nightcrawler",
+  "name": "@compass-marketing/puppet-stream",
   "version": "0.0.15",
   "description": "scraping streams for puppeteer",
   "main": "index.js",
@@ -27,6 +27,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/coreycollins/nightcrawler.git"
+    "url": "https://github.com/compassmarketing/puppet-stream.git"
   }
 }

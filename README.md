@@ -1,15 +1,13 @@
-# Nightcrawler
+# Puppet Stream
 
-[![CircleCI](https://circleci.com/gh/coreycollins/nightcrawler/tree/master.svg?style=svg)](https://circleci.com/gh/coreycollins/nightcrawler/tree/master)
-
-> Nightcrawler is a node library that makes it easy to stream scraping requests to Puppeteer using native NodeJS streams.
+> Puppet Stream is a node library that makes it easy to stream scraping requests to Puppeteer using native NodeJS streams.
 
 ## Getting Started
 
 ### Install
 
 ```
-  npm i @coreycollins/nightcrawler
+  npm i @compass-marketing/puppet-stream
 ```
 
 **Important**: Nightcrawler has a dependency to `puppeteer-core`. This allows for a custom executable to be used if desired. If
@@ -22,7 +20,7 @@ npm i puppeteer
 ### Usage
 
 ```
-const Nightcrawler = require('@coreycollins/nightcrawler')
+const Nightcrawler = require('@compass-marketing/puppet-stream')
 const JSONStream = require('JSONStream')
 
 let nc = new Nightcrawler()
