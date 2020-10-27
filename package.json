@@ -1,6 +1,6 @@
 {
   "name": "@compass-marketing/puppet-stream",
-  "version": "0.0.13",
+  "version": "0.0.16",
   "description": "scraping streams for puppeteer",
   "main": "index.js",
   "engines": {
@@ -10,7 +10,7 @@
     "test": "ava",
     "watch:test": "ava -w -v"
   },
-  "author": "",
+  "author": "Dan Helfman",
   "license": "ISC",
   "dependencies": {
     "async": "^3.0.1",
