@@ -1,6 +1,6 @@
 {
   "name": "@compass-marketing/puppet-stream",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "scraping streams for puppeteer",
   "main": "index.js",
   "engines": {
